@@ -28,45 +28,79 @@ Here are the steps you can take to automate this process:
 
     You can also set up a log file to keep track of the emails that have been sent and any errors that may have occurred during the email sending process. '''
 
-from smtplib import SMTP
+import smtplib, ssl
+import os
 from os import getcwd,listdir
 from os.path import isfile, join
 import schedule
 
-def send_mail():
-    pass
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-dir_path = join(getcwd(),"report_files")
-files_list = [file for file in listdir(dir_path) if isfile(join(dir_path,file))]
-for file in files_list:
-    with open(join(dir_path,file), 'r') as f:
-        content = f.readlines()
-        recipient_mail = content[0]
-        mail_attachement = content[1]
-        mail_content = content[2]
-        send_mail(recipient_mail,mail_attachement,mail_content)
-        f.close()
+def loging(text):
+    with open("log_file.txt",'a') as f:
+        f.write(text+"\n")
 
-# mail_sender = "achraf.ezzaam@gmail.com"
-# mail_receiver = "achraf.ezzaam@gmail.com"
-# message = "Mail test messages!!!"
-# password = input(str("Please enter your email's password: "))
+'''      Sending a mail with an attachment to it      '''
 
-# with SMTP('smtp.gmail.com',587) as server:
-#     server.ehlo()
-#     server.starttls()
-#     server.ehlo()
+def send_mail(mail_recipiant,message,attachment_link):
+    subject = "Daily report"
+    sender_email = input("Type your email and press enter: ")
+    password = input("Type your password and press enter: ")
+
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = mail_recipiant
+    message["Subject"] = subject
+    message["Bcc"] = mail_recipiant
+
+    message.attach(MIMEText(message, "plain"))
+
+    filename = attachment_link
+
+    with open(filename, "rb") as attachment:
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    encoders.encode_base64(part)
+
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {filename}",
+    )
+
+    message.attach(part)
+    text = message.as_string()
     
-#     server.login(mail_sender,password)
-#     print("Login successfully")
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        try:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, mail_recipiant, text)
+            loging("Mail sent successfully")
+        except Exception as e:
+            loging(e)
+        finally:
+            server.quit()
 
-#     server.sendmail(mail_sender,mail_receiver,message)
-#     print("Email has been sent to: "+mail_receiver)
+'''      Getting all the reports in the report_files directory and sending a mail for each one      '''
+
+def check_reports():
+    dir_path = join(getcwd(),"report_files")
+
+    files_list = [file for file in listdir(dir_path) if isfile(join(dir_path,file))]
+    for file in files_list:
+        with open(join(dir_path,file), 'r') as f:
+            content = f.readlines()
+            recipient_mail = content[0]
+            mail_attachement = content[1]
+            mail_content = content[2]
+            send_mail(recipient_mail,mail_content,mail_attachement)
+            f.close()
+        os.remove(file)
 
 '''      Sheduling the daily script execution at 00:00      '''
 
-# schedule.every().day.at("00:00").do()    
-
-'''      Log file for tracking the sent mail status      '''
-
-
+schedule.every().day.at("00:00").do(check_reports)
