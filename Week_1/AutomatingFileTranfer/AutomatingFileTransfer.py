@@ -38,7 +38,13 @@ from os import getcwd, mkdir
 from os.path import join, exists
 import schedule
 
+def loging(text):
+    with open("log_file.txt",'a') as f:
+        f.write(text+"\n")
+
 internal_net = "Don't know what it is but enter it here"
+
+'''      Connecting to the ftp server and saving the files names into a list      '''
 
 host = input("Write your host name then press enter: ")
 user = input("Write your username then press enter: ")
@@ -49,8 +55,8 @@ ftp = FTP(host,user,passwd)
 files_list = []
 
 try:
-    files = ftp.nlst()
-except error_perm as resp:
+    files_list = ftp.nlst()
+except error_perm as resp: # Checking if the directory is empty
     if str(resp) == "550 No files found":
         print("No files in this directory")
     else:
@@ -62,9 +68,20 @@ dir_path = join(getcwd(),"file_store")
 if not exists(dir_path):
     mkdir(dir_path)
 
-for file in files_list:
-    local_file = join(dir_path,file)
-    ftp.retrbinary(file, open(local_file, 'wb').write)
-    shutil.copyfile(local_file, internal_net)
+'''      Looping throw the ftp server's files and copying them localy and moving them to the 
+         internal network ( the destination file for the internal network should be set in the
+         internal_net variable )      '''
 
-schedule.every().day.at("00:00").do()
+def files_upload():
+    for file in files_list:
+        try:
+            local_file = join(dir_path,file)
+            ftp.retrbinary(file, open(local_file, 'wb').write)
+            shutil.copyfile(local_file, internal_net)
+            loging(file+" uploaded successfully")
+        except Exception as e:
+            loging(e)
+        finally:
+            loging("All files processed")
+
+schedule.every().day.at("00:00").do(files_upload)
