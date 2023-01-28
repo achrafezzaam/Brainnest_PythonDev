@@ -12,24 +12,27 @@ Here are the steps you can take to create this project:
 
     Use the datetime library to display the current time and date. '''
 
-''' 
-The link to an icon is:  http://openweathermap.org/img/wn/{icon_id}.png
+from tkinter import *
+from tkinter import ttk
+from PIL import Image
+from io import BytesIO
+import requests
+import json
+import datetime
+import time
 
-solution should look like this: 
-    
-    from PIL import Image
-    import requests
-    from io import BytesIO
+def getDatetime():
+    while True:
+        today = datetime.datetime.now()
+        return today.strftime("%d %B %Y (%H:%M)")
 
+'''
+def getIcon(icon_id):
+    url = "http://openweathermap.org/img/wn/{}.png".format(icon_id)
     response = requests.get(url)
     img = Image.open(BytesIO(response.content))
 
-'''
 
-from tkinter import *
-from tkinter import ttk
-import requests
-import json
 
 country_lat = {"lat":0,"lon":0}
 api_key = "enter your API key"
@@ -48,7 +51,6 @@ daily_temp = []
 for elem in daily_forcast:
     day_info = [elem["weather"]["main"],elem["weather"]["icon"]]
     daily_temp.append(day_info)
-
 '''
 
 root = Tk()
@@ -62,13 +64,17 @@ def print_cont():
 frm = ttk.Frame(root, padding=10)
 frm.grid()
 
-ttk.Label(frm, text="Enter city name:").grid(column=0, row=0)
+variable = StringVar()
+label = ttk.Label(frm, textvariable=variable).grid(column=0, row=0)
 text = StringVar()
 ttk.Entry(frm, textvariable=text).grid(column=1, row=0)
 ttk.Button(frm, text="Quit", command=print_cont).grid(column=2, row=0)
 
+def Refresher():
+    variable.set(getDatetime())
+    frm.after(60000, Refresher)
 
-
+Refresher()
 root.mainloop()
 
-'''
+''''''

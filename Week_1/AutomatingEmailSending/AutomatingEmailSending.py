@@ -101,6 +101,7 @@ def check_reports():
             f.close()
         os.remove(file)
 
-'''      Sheduling the daily script execution at 00:00      '''
-
-schedule.every().day.at("00:00").do(check_reports)
+if __name__=="__main__":
+    check_reports()
+    '''      Sheduling the daily script execution at 00:00      '''
+    schedule.every().day.at("00:00").do(check_reports)

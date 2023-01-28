@@ -84,4 +84,6 @@ def files_upload():
         finally:
             loging("All files processed")
 
-schedule.every().day.at("00:00").do(files_upload)
+if __name__ == "__main__":
+    files_upload()
+    schedule.every().day.at("00:00").do(files_upload)
