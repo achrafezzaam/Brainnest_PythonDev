@@ -12,6 +12,20 @@ Here are the steps you can take to create this project:
 
     Use the datetime library to display the current time and date. '''
 
+''' 
+The link to an icon is:  http://openweathermap.org/img/wn/{icon_id}.png
+
+solution should look like this: 
+    
+    from PIL import Image
+    import requests
+    from io import BytesIO
+
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+
+'''
+
 from tkinter import *
 from tkinter import ttk
 import requests
