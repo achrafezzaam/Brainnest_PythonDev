@@ -83,15 +83,14 @@ class WeatherApp:
             ttk.Label(self.frm2, text=display, width=14, anchor="center").grid(column=count, row=2)
             count+=1
 
-    def print_cont(self,text):
-        output = text.get()
-        self.city = str(output)
-
     def BuildGUI(self):
-        label = ttk.Label(self.frm1, text="Enter city name:").grid(column=0, row=0)
+        def print_cont(text):
+            output = text.get()
+            self.city = str(output)
+        ttk.Label(self.frm1, text="Enter city name:").grid(column=0, row=0)
         text = StringVar()
         ttk.Entry(self.frm1, textvariable=text).grid(column=1, row=0)
-        ttk.Button(self.frm1, text="Quit", command=self.print_cont(text)).grid(column=2, row=0)
+        ttk.Button(self.frm1, text="Quit", command=print_cont).grid(column=2, row=0)
 
         self.BuildForcast()
 
