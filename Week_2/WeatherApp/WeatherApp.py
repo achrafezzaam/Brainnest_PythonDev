@@ -53,26 +53,26 @@ class WeatherApp:
         image = ImageTk.PhotoImage(im)
         return image
 
-    def GetWeatherInfo(self):
+    def GetWeatherInfo(self): # this method gets the lat and lon for given city name then uses them to return teh weather forcast
         r = requests.get("http://api.openweathermap.org/geo/1.0/direct?q={city}&appid={key}".format(city=self.city,key=str(self.api_key)))
         r_json = json.load(r)
 
         forcast_data = requests.get("http://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric".format(lat=r_json["lat"],lon=r_json["lon"]))
         forcast_data_json = json.load(forcast_data)
 
-        daily_forcast = forcast_data_json["daily"]
+        daily_forcast = forcast_data_json["daily"] # Storing the daily forcast only
 
         daily_weath = []
-        for elem in daily_forcast:
+        for elem in daily_forcast: # Creating a list of lists containing the weather state and icon for each day
             day_info = [elem["weather"]["main"],elem["weather"]["icon"]]
             daily_weath.append(day_info)
         return daily_weath
 
-    def BuildForcast(self):
+    def BuildForcast(self): # Building the display frame for the weather forcast state and icons in the root frame app
         forcast = self.GetWeatherInfo()
         count = 0
         for elem in forcast:
-            url = "http://openweathermap.org/img/wn/{}.png".format(elem[1])
+            url = "http://openweathermap.org/img/wn/{}.png".format(elem[1]) # Building the link for the icons
             self.icons.append(self.ImgFromUrl(url))
             today = datetime.datetime.now()
             day = today + datetime.timedelta(days=count)
@@ -83,7 +83,7 @@ class WeatherApp:
             ttk.Label(self.frm2, text=display, width=14, anchor="center").grid(column=count, row=2)
             count+=1
 
-    def BuildGUI(self):
+    def BuildGUI(self): # Building the root frame wich will containe the  other frames ( the from for city name entry and the forcast frame built with the BuildForcast method)
         def print_cont(text):
             output = text.get()
             self.city = str(output)
@@ -94,12 +94,12 @@ class WeatherApp:
 
         self.BuildForcast()
 
-        frm3_label = StringVar()
+        frm3_label = StringVar() # Display of the current date and time
         ttk.Label(self.frm3, textvariable=frm3_label).grid(column=0, row=0)
 
-        self.Refresher(frm3_label)
+        self.Refresher(frm3_label) # Making the date/time display frame refresh each 60s to keep track of time
         self.root.mainloop()
 
 if __name__=="__main__":
     api_key = input("Enter your API Key")
-    WeatherApp("vkwdjfbvkxdjv")
+    WeatherApp(str(api_key))

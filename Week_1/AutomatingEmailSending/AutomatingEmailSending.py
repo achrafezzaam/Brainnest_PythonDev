@@ -39,7 +39,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-def loging(text):
+def logging(text):
     with open("log_file.txt",'a') as f:
         f.write(text+"\n")
 
@@ -56,7 +56,7 @@ def send_mail(mail_recipiant,message,attachment_link):
     message["Subject"] = subject
     message["Bcc"] = mail_recipiant
 
-    message.attach(MIMEText(message, "plain"))
+    message.attach(MIMEText(message, "plain")) # Adding an attachment to the message
 
     filename = attachment_link
 
@@ -79,27 +79,26 @@ def send_mail(mail_recipiant,message,attachment_link):
         try:
             server.login(sender_email, password)
             server.sendmail(sender_email, mail_recipiant, text)
-            loging("Mail sent successfully")
+            logging("Mail sent successfully")
         except Exception as e:
-            loging(e)
+            logging(e)
         finally:
             server.quit()
 
 '''      Getting all the reports in the report_files directory and sending a mail for each one      '''
 
 def check_reports():
-    dir_path = join(getcwd(),"report_files")
+    dir_path = join(getcwd(),"report_files") # Getting the report files folder path
 
-    files_list = [file for file in listdir(dir_path) if isfile(join(dir_path,file))]
+    files_list = [file for file in listdir(dir_path) if isfile(join(dir_path,file))] # Creating a list containing the reports files names
     for file in files_list:
-        with open(join(dir_path,file), 'r') as f:
-            content = f.readlines()
-            recipient_mail = content[0]
-            mail_attachement = content[1]
-            mail_content = content[2]
+        with open(join(dir_path,file), 'r') as f: # Opening the report file
+            content = f.readlines()               # The report files should have the following format
+            recipient_mail = content[0]           # First line: the email of the recipient
+            mail_attachement = content[1]         # Second line: the path to the mail attachement file ( could be possible to make it work with multiple files)
+            mail_content = content[2]             # Third line: the content of the mail
             send_mail(recipient_mail,mail_content,mail_attachement)
-            f.close()
-        os.remove(file)
+        os.remove(file) # deleting the file after sending the mail
 
 if __name__=="__main__":
     check_reports()

@@ -38,52 +38,49 @@ from os import getcwd, mkdir
 from os.path import join, exists
 import schedule
 
-def loging(text):
+def logging(text):
     with open("log_file.txt",'a') as f:
         f.write(text+"\n")
-
-internal_net = "Don't know what it is but enter it here"
-
-'''      Connecting to the ftp server and saving the files names into a list      '''
-
-host = input("Write your host name then press enter: ")
-user = input("Write your username then press enter: ")
-passwd = input("Write your password then press enter: ")
-
-ftp = FTP(host,user,passwd)
-
-files_list = []
-
-try:
-    files_list = ftp.nlst()
-except error_perm as resp: # Checking if the directory is empty
-    if str(resp) == "550 No files found":
-        print("No files in this directory")
-    else:
-        raise
-
-ftp.quit()
-
-dir_path = join(getcwd(),"file_store")
-if not exists(dir_path):
-    mkdir(dir_path)
 
 '''      Looping throw the ftp server's files and copying them localy and moving them to the 
          internal network ( the destination file for the internal network should be set in the
          internal_net variable )      '''
 
 def files_upload():
+    internal_net = "Don't know what it is but enter it here"
+
+    '''      Connecting to the ftp server and saving the files names into a list      '''
+
+    host = input("Write your host name then press enter: ")
+    user = input("Write your username then press enter: ")
+    passwd = input("Write your password then press enter: ")
+
+    ftp = FTP(host,user,passwd)
+
+    files_list = []
+
+    try:
+        files_list = ftp.nlst() # Getting the files
+    except error_perm as resp: # Checking if the directory is empty
+        logging(str(resp)) # Logging the error to the log_file
+
+
+    dir_path = join(getcwd(),"file_store") # Geting the files storage directory path
+    if not exists(dir_path): # Checking if the files storage directory exists
+        mkdir(dir_path)      # If not the directory is created
+
     for file in files_list:
         try:
             local_file = join(dir_path,file)
             ftp.retrbinary(file, open(local_file, 'wb').write)
             shutil.copyfile(local_file, internal_net)
-            loging(file+" uploaded successfully")
+            logging(str(file)+" uploaded successfully")
         except Exception as e:
-            loging(e)
-        finally:
-            loging("All files processed")
+            logging(str(e))
+     
+    ftp.quit()
+    
 
 if __name__ == "__main__":
     files_upload()
-    schedule.every().day.at("00:00").do(files_upload)
+    schedule.every().day.at("00:00").do(files_upload) # Scheduling the script to run every day at midnight
