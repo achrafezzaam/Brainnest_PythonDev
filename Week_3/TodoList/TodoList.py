@@ -6,34 +6,34 @@ import sqlite3
 import datetime
 
 class Database:
-    def __init__(self, db:str) -> None:
+    def __init__(self, db:str) -> None: # Creates the todos table if not existing and connecting to it
         self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
         self.cur.execute("CREATE TABLE IF NOT EXISTS todos (id integer primary key, todo text UNIQUE)")
         self.conn.commit()
     
-    def getTodos(self) -> dict:
-        self.cur.execute("SELECT * FROM todos")
-        all_todos = self.cur.fetchall()
+    def getTodos(self) -> dict[str,int]:        # Select all the todos from the todos table and returns a dictionary 
+        self.cur.execute("SELECT * FROM todos") # with the todo content and id ( this will be used for the listing 
+        all_todos = self.cur.fetchall()         # and the deletion of todo items in the GUI)
         output_dict = {}
         for id,todo in all_todos:
             output_dict[todo] = id
         return output_dict
 
-    def insertTodo(self, todo:str) -> None:
+    def insertTodo(self, todo:str) -> None:                     # Insert a todo to the database
         self.cur.execute("INSERT INTO todos VALUES (NULL, ?)",
                         (todo,))
         self.conn.commit()
 
-    def removeTodo(self, rwid: int) -> None:
+    def removeTodo(self, rwid: int) -> None:                        # Deletes a todo from the database
         self.cur.execute("DELETE FROM todos WHERE id=?", (rwid,))
         self.conn.commit()
 
-    def __del__(self) -> None:
+    def __del__(self) -> None:  # Closes the connexion to the database
         self.conn.close()
 
 class TodoApp:
-    def __init__(self,db:Database) -> None:
+    def __init__(self,db:Database) -> None: # Creates the Todo object, takes the Database object as argument
         self.db = db
         self.todos = self.db.getTodos()
         self.root = Tk()
@@ -64,6 +64,8 @@ class TodoApp:
             val = lb.get(lb.curselection())
             self.db.removeTodo(self.todos[val])
             lb.delete(ANCHOR)
+            
+        # Create the Listbox element that will contain the todo's list
         lb = Listbox(
             self.frm1,
             width=25,
@@ -78,18 +80,20 @@ class TodoApp:
         )
         lb.pack(side=LEFT, fill=BOTH)
 
-        sb = Scrollbar(self.frm1)
+        sb = Scrollbar(self.frm1) # Adding a scroll bar to the Listbox element
         sb.pack(side=RIGHT, fill=BOTH)
 
         lb.config(yscrollcommand=sb.set)
         sb.config(command=lb.yview)
 
+        # Entry field where new todos will be created
         my_entry = Entry(
             self.root,
             font=('times', 16)
             )
         my_entry.pack(pady=20)
 
+        # Button to add a todo
         addTask_btn = Button(
             self.frm2,
             text='Add Task',
@@ -101,6 +105,7 @@ class TodoApp:
         )
         addTask_btn.pack(fill=BOTH, expand=True, side=LEFT)
 
+        # Button to delete a todo
         delTask_btn = Button(
             self.frm2,
             text='Delete Task',
@@ -112,6 +117,7 @@ class TodoApp:
         )
         delTask_btn.pack(fill=BOTH, expand=True, side=LEFT)
 
+        #inserting the queried todos in the Listbox element
         for item in self.todos:
             lb.insert(END, item)
 

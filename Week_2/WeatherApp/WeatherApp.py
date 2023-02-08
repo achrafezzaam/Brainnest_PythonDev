@@ -1,17 +1,3 @@
-''' The goal of this project is to create a weather app that shows the current weather conditions and forecast for a specific location.
-
-Here are the steps you can take to create this project:
-
-    Use the requests library to make an API call to a weather service (e.g. OpenWeatherMap) to retrieve the weather data for a specific location.
-
-    Use the json library to parse the JSON data returned by the API call.
-
-    Use the tkinter library to create a GUI for the app, including widgets such as labels, buttons and text boxes.
-
-    Use the Pillow library to display the weather icons.
-
-    Use the datetime library to display the current time and date. '''
-
 from tkinter import *
 from tkinter import ttk
 from PIL import Image,ImageTk
@@ -37,9 +23,8 @@ class WeatherApp:
         self.BuildGUI()
     
     def getDatetime(self):
-        while True:
-            today = datetime.datetime.now()
-            return today.strftime("Day: %d %B %Y - Time: %H:%M")
+        today = datetime.datetime.now()
+        return today.strftime("Day: %d %B %Y - Time: %H:%M")
     
     def Refresher(self,field):
         field.set(self.getDatetime())
@@ -53,7 +38,7 @@ class WeatherApp:
         image = ImageTk.PhotoImage(im)
         return image
 
-    def GetWeatherInfo(self): # this method gets the lat and lon for given city name then uses them to return teh weather forcast
+    def GetWeatherInfo(self): # this method gets the lat and lon for given city name then uses them to return the weather forcast
         r = requests.get("http://api.openweathermap.org/geo/1.0/direct?q={city}&appid={key}".format(city=self.city,key=str(self.api_key)))
         r_json = json.load(r)
 
@@ -83,7 +68,7 @@ class WeatherApp:
             ttk.Label(self.frm2, text=display, width=14, anchor="center").grid(column=count, row=2)
             count+=1
 
-    def BuildGUI(self): # Building the root frame wich will containe the  other frames ( the from for city name entry and the forcast frame built with the BuildForcast method)
+    def BuildGUI(self): # Building the root frame wich will containe the  other frames ( the form for city name entry and the forcast frame built with the BuildForcast method)
         def print_cont(text):
             output = text.get()
             self.city = str(output)
